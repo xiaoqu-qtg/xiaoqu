@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { Roommate, Duty, Transaction } from '../types';
+import { Roommate, Duty, Transaction, StickyNote } from '../types';
 import { Card } from './ui/Card';
-import { Calendar, Wallet, Gamepad2, Sparkles, AlertCircle } from 'lucide-react';
+import { Calendar, Wallet, Gamepad2, AlertCircle, MessageSquare, ChevronDown } from 'lucide-react';
 
 interface DashboardProps {
   roommates: Roommate[];
@@ -9,9 +9,11 @@ interface DashboardProps {
   transactions: Transaction[];
   currentUser: Roommate;
   onChangeView: (view: any) => void;
+  notes: StickyNote[];
+  onSwitchUser: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ roommates, duties, transactions, currentUser, onChangeView }) => {
+const Dashboard: React.FC<DashboardProps> = ({ roommates, duties, transactions, currentUser, onChangeView, notes, onSwitchUser }) => {
   
   const today = new Date().toISOString().split('T')[0];
   
@@ -31,21 +33,30 @@ const Dashboard: React.FC<DashboardProps> = ({ roommates, duties, transactions, 
     }, 0);
   }, [transactions]);
 
+  // 计算有多少条发给我的私密消息
+  const privateMessagesCount = useMemo(() => {
+    return notes.filter(n => n.recipientId === currentUser.id).length;
+  }, [notes, currentUser.id]);
+
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">嗨, {currentUser.name} 👋</h1>
-          <p className="text-sm text-gray-500">欢迎回到 DormMate 宿舍助手</p>
+          <h1 className="text-2xl font-bold text-gray-800 tracking-tight">欢迎回来 👋</h1>
+          <p className="text-sm text-gray-500 font-medium">今天也是愉快的一天</p>
         </div>
-        <div className={`h-10 w-10 rounded-full ${currentUser.avatar} flex items-center justify-center text-white font-bold shadow-md`}>
+        <button 
+          onClick={onSwitchUser}
+          className={`h-11 w-11 rounded-full ${currentUser.avatar} flex items-center justify-center text-white font-bold shadow-md ring-4 ring-white transition-transform active:scale-90`}
+        >
           {currentUser.name[0]}
-        </div>
+        </button>
       </div>
 
       {/* Duty Alert Card */}
-      <Card className={`${isMyTurn ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white'} transition-colors duration-300`}>
+      <Card className={`${isMyTurn ? 'bg-indigo-600 border-indigo-600 text-white shadow-indigo-200 shadow-lg' : 'bg-white'} transition-colors duration-300 relative overflow-hidden`}>
+        {isMyTurn && <div className="absolute top-0 right-0 p-1 bg-red-500 text-[8px] font-bold text-white px-2 rounded-bl-lg uppercase">Important</div>}
         <div className="flex items-start justify-between">
           <div>
             <h2 className={`text-sm font-semibold uppercase tracking-wider ${isMyTurn ? 'text-indigo-200' : 'text-gray-400'}`}>
@@ -75,6 +86,22 @@ const Dashboard: React.FC<DashboardProps> = ({ roommates, duties, transactions, 
         )}
       </Card>
 
+      {/* Private Messages Notification */}
+      {privateMessagesCount > 0 && (
+        <Card onClick={() => onChangeView('notes')} className="bg-orange-50 border-orange-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-orange-200 rounded-lg text-orange-600">
+              <MessageSquare size={20} />
+            </div>
+            <div>
+              <p className="text-orange-800 font-bold text-sm">收到私密悄悄话</p>
+              <p className="text-orange-600 text-xs">你有 {privateMessagesCount} 条定向便利贴待查收</p>
+            </div>
+          </div>
+          <ChevronDown size={20} className="text-orange-400 -rotate-90" />
+        </Card>
+      )}
+
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
         <Card onClick={() => onChangeView('money')}>
@@ -85,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({ roommates, duties, transactions, 
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-gray-500 text-xs">宿舍公费</p>
+              <p className="text-gray-500 text-xs font-medium">宿舍公费</p>
               <p className="text-xl font-bold text-gray-800">¥{totalBalance.toFixed(2)}</p>
             </div>
           </div>
@@ -99,25 +126,12 @@ const Dashboard: React.FC<DashboardProps> = ({ roommates, duties, transactions, 
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-gray-500 text-xs">娱乐时间</p>
-              <p className="text-sm font-bold text-gray-800">随机抽签 & 游戏</p>
+              <p className="text-gray-500 text-xs font-medium">娱乐时间</p>
+              <p className="text-sm font-bold text-gray-800">随机抽签</p>
             </div>
           </div>
         </Card>
       </div>
-
-      {/* Assistant Teaser */}
-      <Card onClick={() => onChangeView('assistant')} className="bg-gradient-to-r from-pink-500 to-rose-500 text-white border-none">
-         <div className="flex items-center gap-4">
-           <div className="p-3 bg-white/20 rounded-full backdrop-blur-md">
-             <Sparkles size={24} />
-           </div>
-           <div>
-             <h3 className="font-bold text-lg">AI 宿舍小助手</h3>
-             <p className="text-pink-100 text-sm">矛盾调解 & 游戏主持</p>
-           </div>
-         </div>
-      </Card>
     </div>
   );
 };

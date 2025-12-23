@@ -15,5 +15,13 @@ export const TASKS = [
   '整理公共桌面'
 ];
 
+export const NOTE_COLORS = [
+  'bg-yellow-100 border-yellow-200',
+  'bg-pink-100 border-pink-200',
+  'bg-blue-100 border-blue-200',
+  'bg-green-100 border-green-200',
+  'bg-purple-100 border-purple-200',
+];
+
 // Fallback for demo purposes if localStorage is empty
 export const INITIAL_BALANCE = 0;

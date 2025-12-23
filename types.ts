@@ -21,7 +21,17 @@ export interface Transaction {
   type: 'expense' | 'contribution';
 }
 
-export type ViewState = 'dashboard' | 'duty' | 'money' | 'games' | 'assistant';
+export interface StickyNote {
+  id: string;
+  authorId: string;
+  recipientId?: string; // 如果为空，则为全员可见
+  content: string;
+  isAnonymous: boolean;
+  color: string;
+  date: string;
+}
+
+export type ViewState = 'dashboard' | 'duty' | 'money' | 'games' | 'notes';
 
 export enum GameType {
   TRUTH_DARE = 'TRUTH_DARE',

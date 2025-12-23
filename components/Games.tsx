@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Roommate, GameType } from '../types';
-import { generateGameContent } from '../services/geminiService';
+import { Roommate } from '../types';
 import { Card } from './ui/Card';
-import { Dices, RefreshCw, Bot, Loader2 } from 'lucide-react';
+import { Dices } from 'lucide-react';
 
 interface GamesProps {
   roommates: Roommate[];
@@ -11,10 +10,6 @@ interface GamesProps {
 const Games: React.FC<GamesProps> = ({ roommates }) => {
   const [luckyPerson, setLuckyPerson] = useState<Roommate | null>(null);
   const [isRolling, setIsRolling] = useState(false);
-  
-  // AI Game State
-  const [gameContent, setGameContent] = useState<string>('');
-  const [loadingGame, setLoadingGame] = useState(false);
 
   const handleRandomPick = () => {
     setIsRolling(true);
@@ -28,14 +23,6 @@ const Games: React.FC<GamesProps> = ({ roommates }) => {
         setIsRolling(false);
       }
     }, 100);
-  };
-
-  const handleGenerateGame = async (type: GameType) => {
-    setLoadingGame(true);
-    setGameContent('');
-    const content = await generateGameContent(type);
-    setGameContent(content);
-    setLoadingGame(false);
   };
 
   return (
@@ -68,51 +55,6 @@ const Games: React.FC<GamesProps> = ({ roommates }) => {
           </button>
         </div>
       </Card>
-
-      {/* AI Games */}
-      <h3 className="font-bold text-gray-700 mt-8">AI 游戏主持</h3>
-      <div className="grid grid-cols-2 gap-3">
-        <button 
-          onClick={() => handleGenerateGame(GameType.TRUTH_DARE)}
-          className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-left hover:border-pink-300 transition-colors"
-        >
-          <div className="bg-pink-100 w-8 h-8 rounded-full flex items-center justify-center text-pink-500 mb-2">
-            <Bot size={18} />
-          </div>
-          <span className="font-semibold text-gray-800">真心话大冒险</span>
-        </button>
-
-        <button 
-          onClick={() => handleGenerateGame(GameType.WHO_IS_SPY)}
-          className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-left hover:border-blue-300 transition-colors"
-        >
-          <div className="bg-blue-100 w-8 h-8 rounded-full flex items-center justify-center text-blue-500 mb-2">
-            <Bot size={18} />
-          </div>
-          <span className="font-semibold text-gray-800">谁是卧底</span>
-        </button>
-      </div>
-
-      {/* Game Content Output */}
-      {(loadingGame || gameContent) && (
-        <Card className="bg-gray-800 text-white border-gray-700 mt-4">
-          {loadingGame ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="animate-spin mr-2" /> 正在脑暴中...
-            </div>
-          ) : (
-             <div className="prose prose-invert">
-               <p className="whitespace-pre-wrap">{gameContent}</p>
-               <button 
-                onClick={() => setGameContent('')}
-                className="mt-4 text-xs text-gray-400 hover:text-white flex items-center"
-               >
-                 <RefreshCw size={12} className="mr-1" /> 清空
-               </button>
-             </div>
-          )}
-        </Card>
-      )}
     </div>
   );
 };
